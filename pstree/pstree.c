@@ -85,6 +85,8 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    
+
     for (size_t i=0; i<proc_count; i++) {
         printf ("%s\t|", procs[i].name);
         for (size_t j=0; j<procs[i].children_count; j++) {
@@ -104,3 +106,29 @@ bool isNumeric (char* str)
     } while (*++ch != '\0');
     return true;
 }
+
+
+void print_proc (_PROC* proc, bool curly, bool root)
+{
+    static size_t indent_depth = 0;
+    if (root) {
+        printf ("%s", proc->name);
+    } else if (curly) {
+        printf ("%*s", indent_depth, "");
+        printf ("|-%s", proc->name);
+    } else {
+        printf ("--%s", proc->name);
+    }
+    if (proc->children_count) {
+        indent_depth += (root ? 0: 2) + strlen (proc->name);
+        for (size_t i=0; i<proc->children_count; i++) {
+            if (i) {
+                print_proc (proc->children[i], true, false);
+            } else {
+                print_proc (proc->children[i], false, false);
+            }
+        }
+        indent_depth -= (root ? 0: 2) + strlen (proc->name);
+    } else {
+        printf ("\n")
+    }
