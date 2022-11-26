@@ -11,17 +11,21 @@
 
 const char PATH[] = "/proc";
 const int READ_LEN = 128;
+const int DEFAULT_CAPACITY = 8;
 
-typedef struct _proc _proc;
+typedef struct _PROC _PROC;
 
-struct _proc {
-    char name[64];
+struct _PROC {
     int pid;
     int ppid;
-    _proc** children;
+    int children_count;
+    int children_capacity;
+    char name[64];
+    _PROC** children;
 };
 
 bool isNumeric (char* str);
+void printProc (*_PROC proc);
 
 int main(int argc, char *argv[]) {
     DIR* dir;
@@ -39,7 +43,7 @@ int main(int argc, char *argv[]) {
 
     int proc_capacity = 64;
     int proc_count = 0;
-    _proc* procs = malloc (sizeof(_proc) * proc_capacity);
+    _PROC* procs = malloc (sizeof(_PROC) * proc_capacity);
 
     /* get information about processes and store it in a list */
     while ((entry = readdir (dir)) != NULL)
@@ -50,23 +54,49 @@ int main(int argc, char *argv[]) {
             fd = open (fullpath, O_RDONLY);
             read (fd, buf, READ_LEN);
             sscanf (buf, "%d (%s %c %d", &pid, name, &state, &ppid);
-            printf ("%d\n", ppid);
             procs[proc_count].pid = pid;
             procs[proc_count].ppid = ppid;
             name[strlen(name)-1] = 0;
             strcpy (procs[proc_count].name, name);
             procs[proc_count].children = NULL;
-            if (++proc_count >= proc_capacity) realloc (procs, sizeof(_proc) * (proc_capacity*=2));
+            procs[proc_count].children_count = 0;
+            procs[proc_count].children_capacity = 8;
+            if (++proc_count >= proc_capacity) realloc (procs, sizeof(_PROC) * (proc_capacity*=2));
         }
     }
 
+    /* find all the children for any given process */
     for (size_t i=0; i<proc_count; i++)
     {
-        printf ("process name:\t%s\tpid:\t%d\tppid:\t%d\n", procs[i].name, procs[i].pid, procs[i].ppid);
+        for (size_t j=0; j<proc_count; j++)
+        {
+            if (procs[i].pid == procs[j].ppid)
+            {
+                if (procs[i].children)
+                {
+                    procs[i].children[children_count] = &procs[j];
+                    if (++procs[i].children_count >= procs[i].children_capacity)
+                    {
+                        realloc (procs[i].children, sizeof(*_PROC) * (procs[i].children_capacity *= 2));
+                    }
+                } else {
+                    procs[i].children = malloc (sizeof(*_PROC)*DEFAULT_CAPACITY);
+                    procs[i].children[0] = &procs[j];
+                    procs[i].children_count++;
+                }
+            }
+        }
     }
 
-    /* find all the children for any given process */
-  return 0;
+    for (size_t i=0; i<proc_count; i++) {
+        printf ("%s\t|", procs[i].name);
+        for (size_t j=0; j<procs[i].children_count; j++) {
+            printf("\t%s", procs[i].children[j]->name);
+        }
+        printf ("\n");
+    }
+
+    return 0;
 }
 
 bool isNumeric (char* str)
