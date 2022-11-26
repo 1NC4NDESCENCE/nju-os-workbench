@@ -7,7 +7,7 @@
 
 typedef struct _proc _proc;
 
-typedef struct _proc {
+struct _proc {
     char name[64];
     int pid;
     int ppid;
