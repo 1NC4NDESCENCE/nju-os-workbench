@@ -25,7 +25,7 @@ struct _PROC {
 };
 
 bool isNumeric (char* str);
-void printProc (_PROC* proc);
+void print_proc (_PROC* proc, bool curly, bool root);
 
 int main(int argc, char *argv[]) {
     DIR* dir;
