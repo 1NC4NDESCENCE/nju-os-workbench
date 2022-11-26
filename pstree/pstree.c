@@ -54,8 +54,11 @@ int main(int argc, char *argv[]) {
             fd = open (fullpath, O_RDONLY);
             read (fd, buf, READ_LEN);
             sscanf (buf, "%d (%s %c %d", &pid, name, &state, &ppid);
-            procs[proc_count] = {.pid = pid, .ppid = ppid, .children = NULL, 
-                .children_count = 0, .children_capacity = 0};
+            procs[proc_count].pid = pid;
+            procs[proc_count].ppid = ppid;
+            procs[proc_count].children = NULL;
+            procs[proc_count].children_count = 0;
+            procs[proc_count].children_capacity = 0;
             name[strlen(name)-1] = 0;
             strcpy (procs[proc_count].name, name);
             if (++proc_count >= proc_capacity) procs = realloc (procs, sizeof(_PROC) * (proc_capacity*=2));
