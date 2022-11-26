@@ -110,7 +110,7 @@ bool isNumeric (char* str)
 
 void print_proc (_PROC* proc, bool curly, bool root)
 {
-    static size_t indent_depth = 0;
+    static int indent_depth = 0;
     if (root) {
         printf ("%s", proc->name);
     } else if (curly) {
@@ -130,5 +130,5 @@ void print_proc (_PROC* proc, bool curly, bool root)
         }
         indent_depth -= (root ? 0: 2) + strlen (proc->name);
     } else {
-        printf ("\n")
+        printf ("\n");
     }
