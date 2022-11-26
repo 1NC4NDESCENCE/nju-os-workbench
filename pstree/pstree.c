@@ -54,30 +54,28 @@ int main(int argc, char *argv[]) {
             fd = open (fullpath, O_RDONLY);
             read (fd, buf, READ_LEN);
             sscanf (buf, "%d (%s %c %d", &pid, name, &state, &ppid);
-            procs[proc_count].pid = pid;
-            procs[proc_count].ppid = ppid;
+            procs[proc_count] = {.pid = pid, .ppid = ppid, .children = NULL, 
+                .children_count = 0, .children_capacity = 0};
             name[strlen(name)-1] = 0;
             strcpy (procs[proc_count].name, name);
-            procs[proc_count].children = NULL;
-            procs[proc_count].children_count = 0;
-            procs[proc_count].children_capacity = 8;
             if (++proc_count >= proc_capacity) procs = realloc (procs, sizeof(_PROC) * (proc_capacity*=2));
         }
     }
 
     /* find all the children for any given process */
     for (size_t i=0; i<proc_count; i++) {
-        _PROC proc = procs[i];
+        _PROC* proc = &procs[i];
         for (size_t j=0; j<proc_count; j++) {
-            if (proc.pid == procs[j].ppid) {
-                if (proc.children) {
-                    proc.children[proc.children_count] = &procs[j];
-                    if (++proc.children_count >= proc.children_capacity) {
-                        proc.children = realloc (proc.children, sizeof(_PROC*) * (proc.children_capacity *= 2));
+            if (proc->pid == proc->[j].ppid) {
+                if (proc->children) {
+                    proc->children[proc->children_count] = &procs[j];
+                    if (++proc->children_count >= proc->children_capacity) {
+                        proc->children = realloc (proc->children, sizeof(_PROC*) * (proc->children_capacity *= 2));
                     }
                 } else {
-                    proc.children = malloc (sizeof(_PROC*)*DEFAULT_CAPACITY);
-                    proc.children[0] = &procs[j];
+                    proc->children = malloc (sizeof(_PROC*)*DEFAULT_CAPACITY);
+                    proc->children_capacity = DEFAULT_CAPACITY;
+                    proc->children[0] = &procs[j];
                     proc.children_count++;
                 }
             }
