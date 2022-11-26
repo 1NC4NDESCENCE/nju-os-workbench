@@ -69,7 +69,7 @@ int main(int argc, char *argv[]) {
     for (size_t i=0; i<proc_count; i++) {
         _PROC* proc = &procs[i];
         for (size_t j=0; j<proc_count; j++) {
-            if (proc->pid == proc->[j].ppid) {
+            if (proc->pid == procs[j].ppid) {
                 if (proc->children) {
                     proc->children[proc->children_count] = &procs[j];
                     if (++proc->children_count >= proc->children_capacity) {
@@ -79,7 +79,7 @@ int main(int argc, char *argv[]) {
                     proc->children = malloc (sizeof(_PROC*)*DEFAULT_CAPACITY);
                     proc->children_capacity = DEFAULT_CAPACITY;
                     proc->children[0] = &procs[j];
-                    proc.children_count++;
+                    proc->children_count++;
                 }
             }
         }
