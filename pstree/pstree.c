@@ -9,7 +9,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-const char PATH[] = "~/proc";
+const char PATH[] = "/proc";
 const int READ_LEN = 128;
 
 typedef struct _proc _proc;
