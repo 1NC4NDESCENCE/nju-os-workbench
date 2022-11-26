@@ -61,24 +61,19 @@ int main(int argc, char *argv[]) {
             procs[proc_count].children = NULL;
             procs[proc_count].children_count = 0;
             procs[proc_count].children_capacity = 8;
-            if (++proc_count >= proc_capacity) realloc (procs, sizeof(_PROC) * (proc_capacity*=2));
+            if (++proc_count >= proc_capacity) procs = realloc (procs, sizeof(_PROC) * (proc_capacity*=2));
         }
     }
 
     /* find all the children for any given process */
-    for (size_t i=0; i<proc_count; i++)
-    {
+    for (size_t i=0; i<proc_count; i++) {
         _PROC proc = procs[i];
-        for (size_t j=0; j<proc_count; j++)
-        {
-            if (proc.pid == procs[j].ppid)
-            {
-                if (proc.children)
-                {
+        for (size_t j=0; j<proc_count; j++) {
+            if (proc.pid == procs[j].ppid) {
+                if (proc.children) {
                     proc.children[proc.children_count] = &procs[j];
-                    if (++proc.children_count >= proc.children_capacity)
-                    {
-                        realloc (proc.children, sizeof(_PROC*) * (proc.children_capacity *= 2));
+                    if (++proc.children_count >= proc.children_capacity) {
+                        proc.children = realloc (proc.children, sizeof(_PROC*) * (proc.children_capacity *= 2));
                     }
                 } else {
                     proc.children = malloc (sizeof(_PROC*)*DEFAULT_CAPACITY);
@@ -94,7 +89,7 @@ int main(int argc, char *argv[]) {
         for (size_t j=0; j<procs[i].children_count; j++) {
             printf("\t%s", procs[i].children[j]->name);
         }
-        printf ("\n");
+        printf ("\n%d children\n", procs[i].children_count);
     }
 
     return 0;
