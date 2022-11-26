@@ -132,3 +132,5 @@ void print_proc (_PROC* proc, bool curly, bool root)
     } else {
         printf ("\n");
     }
+}
+
