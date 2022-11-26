@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
     }
 
     assert (procs[0].pid == 1 && procs[0].ppid == 0);
-    print_proc (&procs[0]);
+    print_proc (&procs[0], false, true);
 
     return 0;
 }
