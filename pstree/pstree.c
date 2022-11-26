@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
 
     for (size_t i=0; i<proc_count; i++)
     {
-        printf ("process name:\t%s\tpid:\t%d\tppid:\t%d", procs[i].name, procs[i].pid, procs[i].ppid);
+        printf ("process name:\t%s\tpid:\t%d\tppid:\t%d\n", procs[i].name, procs[i].pid, procs[i].ppid);
     }
 
     /* find all the children for any given process */
