@@ -85,15 +85,8 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    
-
-    for (size_t i=0; i<proc_count; i++) {
-        printf ("%s\t|", procs[i].name);
-        for (size_t j=0; j<procs[i].children_count; j++) {
-            printf("\t%s", procs[i].children[j]->name);
-        }
-        printf ("\n%d children\n", procs[i].children_count);
-    }
+    assert (procs[0].pid == 1 && procs[0].ppid == 0);
+    print_proc (&procs[0]);
 
     return 0;
 }
