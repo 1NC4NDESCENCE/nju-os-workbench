@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
             sprintf (fullpath, "%s/%s/stat", PATH, entry->d_name);
             fd = open (fullpath, O_RDONLY);
             read (fd, buf, READ_LEN);
-            sscanf (buf, "%d (%s) %c %d", &pid, name, &state, &ppid);
+            sscanf (buf, "%d (%s %c %d", &pid, name, &state, &ppid);
             printf ("%d\n", ppid);
             procs[proc_count].pid = pid;
             procs[proc_count].ppid = ppid;
