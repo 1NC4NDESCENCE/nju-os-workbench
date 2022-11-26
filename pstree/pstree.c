@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <dirent.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 const char PATH[] = "~/proc";
 const int READ_LEN = 256;
@@ -47,7 +48,7 @@ int main(int argc, char *argv[]) {
             sprintf (fullpath, "%s/%s/stat", PATH, entry->d_name);
             fd = open (fullpath, O_RDONLY);
             read (fd, buf, READ_LEN);
-            sscanf (buf, "%d (%s) %c %d", pid, name, state, ppid);
+            sscanf (buf, "%d (%s) %c %d", &pid, name, &state, &ppid);
             procs[proc_count].pid = pid;
             procs[proc_count].ppid = ppid;
             strcpy (procs[proc_count].name, name);
