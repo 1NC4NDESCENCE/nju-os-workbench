@@ -12,7 +12,7 @@ typedef struct _proc {
     int pid;
     int ppid;
     _proc** children;
-}
+};
 
 
 int main(int argc, char *argv[]) {
