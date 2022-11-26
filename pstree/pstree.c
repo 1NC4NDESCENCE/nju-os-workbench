@@ -25,7 +25,7 @@ struct _PROC {
 };
 
 bool isNumeric (char* str);
-void printProc (*_PROC proc);
+void printProc (_PROC* proc);
 
 int main(int argc, char *argv[]) {
     DIR* dir;
@@ -68,21 +68,22 @@ int main(int argc, char *argv[]) {
     /* find all the children for any given process */
     for (size_t i=0; i<proc_count; i++)
     {
+        _PROC proc = procs[i]
         for (size_t j=0; j<proc_count; j++)
         {
-            if (procs[i].pid == procs[j].ppid)
+            if (proc.pid == procs[j].ppid)
             {
-                if (procs[i].children)
+                if (proc.children)
                 {
-                    procs[i].children[children_count] = &procs[j];
-                    if (++procs[i].children_count >= procs[i].children_capacity)
+                    proc.children[proc.children_count] = &procs[j];
+                    if (++proc.children_count >= proc.children_capacity)
                     {
-                        realloc (procs[i].children, sizeof(*_PROC) * (procs[i].children_capacity *= 2));
+                        realloc (proc.children, sizeof(_PROC*) * (proc.children_capacity *= 2));
                     }
                 } else {
-                    procs[i].children = malloc (sizeof(*_PROC)*DEFAULT_CAPACITY);
-                    procs[i].children[0] = &procs[j];
-                    procs[i].children_count++;
+                    proc.children = malloc (sizeof(_PROC*)*DEFAULT_CAPACITY);
+                    proc.children[0] = &procs[j];
+                    proc.children_count++;
                 }
             }
         }
