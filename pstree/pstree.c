@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
     dir = opendir (PATH);
 
     int fd;
-    char fullpath[64];
+    char fullpath[320];
     char buf[128];
     
     int pid;
@@ -72,4 +72,5 @@ bool isNumeric (char* str)
     do {
         if (*ch < '0' || *ch > '9') return false;
     } while (*++ch != '\0');
+    return true;
 }
