@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
     /* find all the children for any given process */
     for (size_t i=0; i<proc_count; i++)
     {
-        _PROC proc = procs[i]
+        _PROC proc = procs[i];
         for (size_t j=0; j<proc_count; j++)
         {
             if (proc.pid == procs[j].ppid)
