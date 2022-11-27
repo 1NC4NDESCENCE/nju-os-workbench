@@ -47,6 +47,22 @@ void* pop (STACK* stack);
 void print_prefix (STACK* stack);
 
 int main(int argc, char *argv[]) {
+    bool show_pid = false;
+    bool sort = false;
+    bool version = false;
+
+    for (size_t i=1; i<argc; i++) {
+        if (!strcmp(argv[i], "--show-pids") || !strcmp(argv[i], "-p")) {
+            show_pid = true;
+        } else if (!strcmp(argv[i], "--numeric-sort") || !strcmp(argv[i], "-n")) {
+            sort = true;
+        } else if (!strcmp(argv[i], "--version") || !strcmp(argv[i], "-v")) {
+            version = true;
+        }
+    }
+
+    printf ("show pid: %d\tsort: %d\tversion:%d\t\n", (int) show_pid, (int) sort, (int) version);
+
     DIR* dir;
     struct dirent *entry;
     dir = opendir (PATH);
