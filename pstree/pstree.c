@@ -41,7 +41,7 @@ typedef struct _level_info {
 } _level_info;
 
 bool isNumeric (char* str);
-void print_proc (_PROC* proc, bool curly, bool root);
+void print_proc (_PROC* proc, bool curly, bool root, bool has_more_than_one_child);
 void push (STACK* stack, void* entry);
 void* pop (STACK* stack);
 void print_prefix (STACK* stack);
@@ -124,13 +124,15 @@ bool isNumeric (char* str)
 }
 
 
-void print_proc (_PROC* proc, bool curly, bool root)
+void print_proc (_PROC* proc, bool curly, bool root, bool has_more_than_one_child)
 {
     static STACK indent_depths = {NULL, STACK_CAPACITY, 0};
     if (root) {
         indent_depths.entries = malloc (sizeof(TYPE)*indent_depths.capacity);
     } else if (curly) {
         print_prefix (&indent_depths);
+    } else if (has_more_than_one_child) {
+        printf ("─┬─");
     } else {
         printf ("───");
     }
@@ -143,9 +145,9 @@ void print_proc (_PROC* proc, bool curly, bool root)
         for (size_t i=0; i<proc->children_count; i++) {
             if (i+1 == proc->children_count) level_info_p->vertical_line = false;
             if (i) {
-                print_proc (proc->children[i], true, false);
+                print_proc (proc->children[i], true, false, proc->children_count > 1);
             } else {
-                print_proc (proc->children[i], false, false);
+                print_proc (proc->children[i], false, false, proc->children_count > 1);
             }
         }
         pop (&indent_depths);
