@@ -58,6 +58,8 @@ int main(int argc, char *argv[]) {
             sort = true;
         } else if (!strcmp(argv[i], "--version") || !strcmp(argv[i], "-v")) {
             version = true;
+        } else {
+            fprintf (stderr, "unknown argument: %s\n", argv[i]);
         }
     }
 
