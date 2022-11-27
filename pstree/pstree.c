@@ -140,7 +140,7 @@ void print_proc (_PROC* proc, bool curly, bool root)
         TYPE* level_info_p = malloc (sizeof(TYPE));
         level_info_p->depth = strlen (proc->name);
         level_info_p->vertical_line = proc->children_count > 1;
-        push (indent_depths, level_info_p);
+        push (&indent_depths, level_info_p);
         for (size_t i=0; i<proc->children_count; i++) {
             if (i+1 == proc->children_count) level_info_p->vertical_line = false;
             if (i) {
@@ -149,7 +149,7 @@ void print_proc (_PROC* proc, bool curly, bool root)
                 print_proc (proc->children[i], false, false);
             }
         }
-        pop (indent_depths);
+        pop (&indent_depths);
     } else {
         printf ("\n");
     }
@@ -177,7 +177,7 @@ void* pop (STACK* stack) {
 
 void print_prefix (STACK* stack) {
     for (size_t i=0; i<stack->size; i++) {
-        void* entry = stack->entries[i];
+        TYPE* entry = stack->entries[i];
         printf ("%*s", entry->depth, "");
         if (i+1 == stack->size) break;
         if (entry->vertical_line) {
