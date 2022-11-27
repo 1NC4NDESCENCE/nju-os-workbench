@@ -129,7 +129,7 @@ void print_proc (_PROC* proc, bool curly, bool root)
     static STACK indent_depths = {NULL, 0, STACK_CAPACITY};
     if (root) {
         printf ("%s", proc->name);
-        indent_depths.entries = malloc (sizeof(type)*indent_depths.capacity);
+        indent_depths.entries = malloc (sizeof(TYPE)*indent_depths.capacity);
     } else if (curly) {
         print_prefix (&indent_depths);
         printf ("|-%s", proc->name);
