@@ -126,7 +126,7 @@ bool isNumeric (char* str)
 
 void print_proc (_PROC* proc, bool curly, bool root)
 {
-    static STACK indent_depths = {NULL, 0, STACK_CAPACITY};
+    static STACK indent_depths = {NULL, STACK_CAPACITY, 0};
     if (root) {
         printf ("%s", proc->name);
         indent_depths.entries = malloc (sizeof(TYPE)*indent_depths.capacity);
