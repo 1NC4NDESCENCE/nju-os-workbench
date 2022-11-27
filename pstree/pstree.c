@@ -183,12 +183,12 @@ void print_prefix (STACK* stack) {
             if (entry->vertical_line) {
                 printf (" ├─");
             } else {
-                printf (" ├─");
+                printf (" └─");
             }
             break;
         }
         if (entry->vertical_line) {
-            printf (" ├ ");
+            printf (" │ ");
         } else {
             printf ("   ");
         }
