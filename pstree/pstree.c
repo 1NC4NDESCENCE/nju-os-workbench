@@ -8,10 +8,15 @@
 #include <dirent.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <pthread.h>
+#include <errno.h>
+
+#define TYPE _level_info
 
 const char PATH[] = "/proc";
 const int READ_LEN = 128;
-const int DEFAULT_CAPACITY = 8;
+const int CHILDREN_CAPACITY = 8;
+const int STACK_CAPACITY = 64;
 
 typedef struct _PROC _PROC;
 
@@ -24,8 +29,22 @@ struct _PROC {
     _PROC** children;
 };
 
+typedef struct STACK {
+    void** entries;
+    int capacity;
+    int size;
+} STACK;
+
+typedef struct _level_info {
+    int depth;
+    bool vertical_line;
+} _level_info;
+
 bool isNumeric (char* str);
 void print_proc (_PROC* proc, bool curly, bool root);
+void push (STACK* stack, void* entry);
+void* pop (STACK* stack);
+void print_prefix (STACK* stack);
 
 int main(int argc, char *argv[]) {
     DIR* dir;
@@ -76,8 +95,8 @@ int main(int argc, char *argv[]) {
                         proc->children = realloc (proc->children, sizeof(_PROC*) * (proc->children_capacity *= 2));
                     }
                 } else {
-                    proc->children = malloc (sizeof(_PROC*)*DEFAULT_CAPACITY);
-                    proc->children_capacity = DEFAULT_CAPACITY;
+                    proc->children = malloc (sizeof(_PROC*)*CHILDREN_CAPACITY);
+                    proc->children_capacity = CHILDREN_CAPACITY;
                     proc->children[0] = &procs[j];
                     proc->children_count++;
                 }
@@ -87,7 +106,11 @@ int main(int argc, char *argv[]) {
 
     assert (procs[0].pid == 1 && procs[0].ppid == 0);
     print_proc (&procs[0], false, true);
-
+    
+    for (size_t i=0; i<proc_count; i++) {
+        free (procs[i].children);
+    }
+    free (procs);
     return 0;
 }
 
@@ -103,27 +126,65 @@ bool isNumeric (char* str)
 
 void print_proc (_PROC* proc, bool curly, bool root)
 {
-    static int indent_depth = 0;
+    static STACK indent_depths = {NULL, 0, STACK_CAPACITY};
     if (root) {
         printf ("%s", proc->name);
+        indent_depths.entries = malloc (indent_depths.capacity);
     } else if (curly) {
-        printf ("%*s", indent_depth, "");
+        print_prefix (&indent_depths);
         printf ("|-%s", proc->name);
     } else {
         printf ("--%s", proc->name);
     }
     if (proc->children_count) {
-        indent_depth += (root ? 0: 2) + strlen (proc->name);
+        TYPE* level_info_p = malloc (sizeof(TYPE));
+        level_info_p->depth = strlen (proc->name);
+        level_info_p->vertical_line = proc->children_count > 1;
+        push (indent_depths, level_info_p);
         for (size_t i=0; i<proc->children_count; i++) {
+            if (i+1 == proc->children_count) level_info_p->vertical_line = false;
             if (i) {
                 print_proc (proc->children[i], true, false);
             } else {
                 print_proc (proc->children[i], false, false);
             }
         }
-        indent_depth -= (root ? 0: 2) + strlen (proc->name);
+        pop (indent_depths);
     } else {
         printf ("\n");
+    }
+    if (root) {
+        for (size_t i=0; i<indent_depths.size; i++) {
+            free (indent_depths.entries[i]);
+        }
+        indent_depths.size = 0;
+        indent_depths.capacity = STACK_CAPACITY;
+        free (indent_depths.entries);
+    }
+}
+
+void push (STACK* stack, void* entry) {
+    if (stack->size + 1 >= stack->capacity) {
+        stack->entries = realloc (stack->entries, sizeof (TYPE) * (stack->capacity *= 2));
+    }
+    stack->entries[stack->size++] = entry;
+}
+
+void* pop (STACK* stack) {
+    if (!(stack->size--)) perror ("popping empty stack\n");
+    return stack->entries[stack->size];
+}
+
+void print_prefix (STACK* stack) {
+    for (size_t i=0; i<stack->size; i++) {
+        void* entry = stack->entries[i];
+        printf ("%*s", entry->depth, "");
+        if (i+1 == stack->size) break;
+        if (entry->vertical_line) {
+            printf ("| ");
+        } else {
+            printf ("  ");
+        }
     }
 }
 
