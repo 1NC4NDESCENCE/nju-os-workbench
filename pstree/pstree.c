@@ -105,7 +105,7 @@ int main(int argc, char *argv[]) {
     }
 
     assert (procs[0].pid == 1 && procs[0].ppid == 0);
-    print_proc (&procs[0], false, true);
+    print_proc (&procs[0], false, true, false);
     
     for (size_t i=0; i<proc_count; i++) {
         free (procs[i].children);
