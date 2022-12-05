@@ -40,31 +40,72 @@ typedef struct _level_info {
     bool vertical_line;
 } _level_info;
 
+typedef int (*CMP_FUNC)(void*, void*);
+
 bool isNumeric (char* str);
 void print_proc (_PROC* proc, bool curly, bool root, bool has_more_than_one_child);
 void push (STACK* stack, void* entry);
 void* pop (STACK* stack);
 void print_prefix (STACK* stack);
+int cmp_int (const void* a, const void* b);
+
+bool show_pid = false;
+bool sort = false;
+bool version = false;
 
 int main(int argc, char *argv[]) {
-    bool show_pid = false;
-    bool sort = false;
-    bool version = false;
-
+    bool invalid = false;
+    char arg[64];
     for (size_t i=1; i<argc; i++) {
-        if (!strcmp(argv[i], "--show-pids") || !strcmp(argv[i], "-p")) {
-            show_pid = true;
-        } else if (!strcmp(argv[i], "--numeric-sort") || !strcmp(argv[i], "-n")) {
-            sort = true;
-        } else if (!strcmp(argv[i], "--version") || !strcmp(argv[i], "-v")) {
-            version = true;
-        } else {
-            fprintf (stderr, "unknown argument: %s\n", argv[i]);
+        if (strlen(argv[i]) < 2) {
+            invalid = true;
+            strcpy (arg, argv[i]);
         }
+        else if (!strcmp(argv[i], "-V") || !strcmp(argv[i], "--version")) {
+            printf ("Knockoff pstree v1.0 by Xueyuan Jiao\n");
+            return 0;
+        }
+        else if (argv[i][0] == '-') {
+            if (argv[i][1] == '-') {
+                if (!strcmp(argv[i], "--show-pids")) {
+                    show_pid = true;
+                } else if (!strcmp(argv[i], "--sort")) {
+                    sort = true;
+                } else if (!strcmp(argv[i], "--version")) {
+                    version = true;
+                } else {
+                    invalid = true;
+                    strcpy (arg, argv[i]);
+                }
+            } else {
+                for (size_t j=1; j<strlen(argv[i]); j++) {
+                    if (argv[i][j] == 'p') {
+                        show_pid = true;
+                    } else if (argv[i][j] == 's') {
+                        sort = true;
+                    } else if (argv[i][j] == 'V') {
+                        version = true;
+                    } else {
+                        invalid = true;
+                        strcpy (arg, argv[i]);
+                    }
+                }
+            }
+        } else {
+            invalid = true;
+            strcpy (arg, argv[i]);
+        } 
     }
 
-    printf ("show pid: %d\tsort: %d\tversion:%d\t\n", (int) show_pid, (int) sort, (int) version);
-
+    if (invalid) {
+        fprintf (stderr, "unknown argument: %s\n", arg);
+        printf ("Usage:\n");
+        printf ("--show-pids or -p to display pid for every process\n");
+        printf ("--sort or -s to sort the children of every process by their pid\n");
+        printf ("--version or -V to display version information\n");
+        return 1;
+    }
+    
     DIR* dir;
     struct dirent *entry;
     dir = opendir (PATH);
@@ -122,8 +163,15 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    if (sort) {
+        for (size_t i=0; i<proc_count; i++) {
+            if (procs[i].children_count > 1);
+            qsort (procs[i].children, procs[i].children_count, sizeof (_PROC*), &cmp_int);
+        }
+    }
+
     assert (procs[0].pid == 1 && procs[0].ppid == 0);
-    print_proc (&procs[0], false, true, false);
+    print_proc (procs, false, true, false);
     
     for (size_t i=0; i<proc_count; i++) {
         free (procs[i].children);
@@ -154,10 +202,16 @@ void print_proc (_PROC* proc, bool curly, bool root, bool has_more_than_one_chil
     } else {
         printf ("───");
     }
-    printf ("%s", proc->name);
+    char name_str[128];
+    if (show_pid) {
+        sprintf (name_str, "%s(%d)", proc->name, proc->pid);
+    } else {
+        sprintf (name_str, "%s", proc->name);
+    }
+    printf ("%s", name_str);
     if (proc->children_count) {
         TYPE* level_info_p = malloc (sizeof(TYPE));
-        level_info_p->depth = strlen (proc->name);
+        level_info_p->depth = strlen (name_str);
         level_info_p->vertical_line = proc->children_count > 1;
         push (&indent_depths, level_info_p);
         for (size_t i=0; i<proc->children_count; i++) {
@@ -213,4 +267,6 @@ void print_prefix (STACK* stack) {
         }
     }
 }
+
+int cmp_int (const void* a, const void* b) { return ((_PROC*)a)->pid - ((_PROC*)b)->pid; }
 
